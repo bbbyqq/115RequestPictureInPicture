@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         115实现画中画
+// @name         115画中画
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  在115播放界面加入画中画按钮!
@@ -18,7 +18,13 @@
   headline.appendChild(btn)
 
   // 绑定按键点击功能
+  let flag = false
   btn.onclick = function () {
-    document.getElementById('js-video').requestPictureInPicture()
+    flag = !flag
+    if (flag) {
+      document.getElementById('js-video').requestPictureInPicture()
+    } else {
+      document.exitPictureInPicture()
+    }
   }
 })()
