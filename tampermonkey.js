@@ -6,6 +6,7 @@
 // @author       bbbyqq
 // @match        *://v.anxia.com/*
 // @grant        none
+// @license      bbbyqq
 // ==/UserScript==
 
 (function () {
