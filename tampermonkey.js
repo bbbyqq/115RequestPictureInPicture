@@ -1,16 +1,24 @@
 // ==UserScript==
 // @name         115画中画
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.7
 // @description  在115播放界面加入画中画按钮!
 // @author       bbbyqq
 // @match        *://v.anxia.com/*
+// @match        *://115.com/*
+// @match        *://115vod.com/*
 // @grant        GM_addStyle
 // @license      bbbyqq
+// @downloadURL https://update.greasyfork.org/scripts/448265/115%E7%94%BB%E4%B8%AD%E7%94%BB.user.js
+// @updateURL https://update.greasyfork.org/scripts/448265/115%E7%94%BB%E4%B8%AD%E7%94%BB.meta.js
 // ==/UserScript==
 
 (function () {
   'use strict'
+
+  /**
+   * 播放页面新增画中画按钮
+   */
   const menu = document.querySelector('.bar-side ul')
   const li = document.createElement('li')
   const a = document.createElement('a')
@@ -22,6 +30,9 @@
   const css = `
   .icon-operate.iop-picture {
      background-position-x: -200px;
+  }
+  .topfloat-cell {
+     top: 12px;
   }`
   GM_addStyle(css) // GM_addStyle动态添加css
   div.textContent = '画中画'
@@ -29,7 +40,9 @@
   a.appendChild(i)
   a.appendChild(div)
   li.appendChild(a)
-  menu.insertBefore(li, menu.childNodes[4])
+  if (menu) {
+    menu.insertBefore(li, menu.childNodes[4])
+  }
 
   const videoElement = document.getElementById('js-video')
   // 绑定按键点击功能
@@ -45,4 +58,66 @@
       }
     }
   }
+
+  /**
+   * 删除115广告
+   */
+  document.getElementById('js_common_mini-dialog')?.remove()
+
+  /**
+   * 首页添加云下载
+   */
+  document.querySelector('#js_top_panel_box .left-tvf').insertAdjacentHTML(
+    'beforeend',
+    '<a href="javascript:;" class="button btn-line btn-upload" menu="offline_task"><i class="icon-operate ifo-linktask"></i><span>云下载</span><em style="display:none;" class="num-dot"></em></a>'
+  )
+
+  /**
+   * 菜单加上“加密隐藏 / 显示属性”按钮
+   */
+  const addButtons = () => {
+    const menuList = document.querySelectorAll('.file-opr[rel="menu"]')
+
+    menuList.forEach(menuContainer => {
+      // 防止重复插入
+      if (menuContainer.querySelector('[menu="hide_file"]')) return
+
+      const shareBtn = menuContainer.querySelector('a[menu="public_share"]')
+      if (!shareBtn) return
+
+      // 加密隐藏
+      const encryptBtn = document.createElement('a')
+      encryptBtn.href = 'javascript:;'
+      encryptBtn.setAttribute('menu', 'hide_file')
+      encryptBtn.innerHTML = `
+        <i class="icon-operate ifo-encrypt"></i>
+        <span>加密隐藏</span>
+      `
+
+      // 显示属性
+      const propBtn = document.createElement('a')
+      propBtn.href = 'javascript:;'
+      propBtn.setAttribute('menu', 'attribute')
+      propBtn.innerHTML = `
+        <i class="icon-operate ifo-prop"></i>
+        <span>显示属性</span>
+      `
+
+      menuContainer.insertBefore(propBtn, menuContainer.firstChild) // 显示属性放最前面
+      if (shareBtn.parentNode) {
+        shareBtn.parentNode.insertBefore(encryptBtn, shareBtn.nextSibling) // 加密隐藏跟在分享按钮后
+      }
+    })
+  }
+
+  // 初次执行
+  addButtons()
+
+  // 监听 DOM 变化（115 菜单是动态生成的）
+  const observer = new MutationObserver(addButtons)
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  })
+
 })()
